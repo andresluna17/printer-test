@@ -9,35 +9,36 @@
 
 <script lang="ts">
 import escpos from "escpos";
-const usb = require("escpos-usb");
-escpos.USB = usb;
+const USB = require("escpos-usb");
+escpos.USB = USB;
 export default {
   name: "app",
   methods: {
     printPaper() {
-      try {
-        console.log("printPaper! start");
-        const device = new escpos.USB();
-        const options = { encoding: "GB18030" /* default */ };
-        const printer = new escpos.Printer(device, options);
-
-        device.open(function () {
-          printer
-            .font("A")
-            .align("CT")
-            .style("BU")
-            .size(1, 1)
-            .text("Hello world!")
-            .text("Welcome to the Awesome-land!!!")
-            .cut()
-            .cashdraw()
-            .close();
+      console.log("printPaper! start");
+      let devices = escpos.USB.findPrinter();
+      if (devices)
+        devices.forEach((device) => {
+          const options = { encoding: "GB18030" /* default */ };
+          const printer = new escpos.Printer(device, options);
+          console.log(":D");
+          console.log({ device });
+          device.open((error, d) => {
+            if (error) console.log({ error, device: d });
+            else
+              printer
+                .font("A")
+                .align("CT")
+                .style("BU")
+                .size(1, 1)
+                .text("Hello world!")
+                .text("Welcome to the Awesome-land!!!")
+                .cut()
+                .cashdraw()
+                .close();
+          });
         });
-      } catch (error) {
-        console.log({ error });
-      } finally {
-        console.log("printPaper! end");
-      }
+      // const device = escpos.USB();
     },
   },
 };
